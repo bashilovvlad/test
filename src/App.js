@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo, useEffect, useState } from "react";
+import React, { Fragment, useMemo, useEffect, useState, useCallback } from "react";
 import GlobalStyle from "./globalStyle";
 import styled from "styled-components";
 
@@ -13,6 +13,7 @@ import List from "./modules/List";
 const Layout = styled.div`
   display: flex;
   flex-direction: column;
+  padding-bottom: 20px;
 `;
 
 const Container = styled.div`
@@ -45,7 +46,7 @@ const useTickets = () => {
   const [error, setError] = useState("");
   const [loaded, setLoaded] = useState(false);
 
-  const load = React.useCallback(async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const r = await fetch(
@@ -123,7 +124,7 @@ const App = () => {
             />
           </Aside>
           <Main>
-            <List list={filteredTickets} />
+            <List tickets={filteredTickets} />
             {error ? (
               <Message
                 error

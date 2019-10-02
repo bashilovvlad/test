@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useState } from "react";
+import styled from "styled-components";
 
-import Button from '../../components/Button';
-import Sort from '../Sort';
-import ListItem from './ListItem';
+import Button from "../../components/Button";
+import Sort from "../Sort";
+import ListItem from "./ListItem";
 
 const Container = styled.div`
   width: 500px;
@@ -11,70 +11,53 @@ const Container = styled.div`
   border-radius: 5px;
 `;
 
-class List extends Component {
-  state = {
-    isPriceSort: true,
-    viewList: [],
-    list: [],
-    count: 5,
+const List = ({ tickets }) => {
+  const [sortedList, setSortedList] = useState([]);
+  const [count, setCount] = useState(5);
+  const [isPriceSort, setPriceSort] = useState(true);
+
+  const handleChangeSortType = type => {
+    setPriceSort(type);
   };
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.list !== this.props.list) {
-      const list = [...this.props.list].sort((a, b) => a.price - b.price);
-      const viewList = [...list].splice(0, this.state.count);
-      this.setState({
-        viewList,
-        list,
-      });
-    }
-  }
-
-  handleChangeSortType = typePrice => {
+  useEffect(() => {
     let list;
-    if (typePrice) {
-      list = [...this.state.list].sort((a, b) => a.price - b.price);
+    if (isPriceSort) {
+      list = [...tickets].sort((a, b) => a.price - b.price);
     } else {
-      list = [...this.state.list].sort(
+      list = [...tickets].sort(
         (a, b) =>
           a.segments[0].duration +
           a.segments[1].duration -
           (b.segments[0].duration + b.segments[1].duration)
       );
     }
-    this.setState({
-      isPriceSort: typePrice,
-      list,
-      viewList: [...list].splice(0, this.state.count),
-    });
-  };
 
-  handleShowMore = () => {
-    this.setState({
-      viewList: [...this.state.list].splice(0, this.state.count + 5),
-      count: this.state.count + 5,
-    });
-  };
+    setSortedList([...list].splice(0, count));
+  }, [tickets, count, isPriceSort]);
 
-  render() {
-    return (
-      <Container>
-        <Sort
-          price={this.state.isPriceSort}
-          onClick={this.handleChangeSortType}
-        ></Sort>
-        {this.state.viewList.map((i, index) => (
-          <ListItem ticket={i} key={index} />
-        ))}
-        {this.state.viewList.length &&
-        this.state.viewList.length !== this.state.list.length ? (
-          <Button onClick={this.handleShowMore} left right>
-            Show more
-          </Button>
-        ) : null}
-      </Container>
-    );
-  }
-}
+  return (
+    <Container>
+      <Sort
+        price={isPriceSort}
+        onClick={type => handleChangeSortType(type)}
+      ></Sort>
+      {sortedList.map((i, index) => (
+        <ListItem ticket={i} key={index} />
+      ))}
+      {sortedList.length && sortedList.length !== tickets.length ? (
+        <Button
+          onClick={() => {
+            setCount(count + 5);
+          }}
+          left
+          right
+        >
+          Show more
+        </Button>
+      ) : null}
+    </Container>
+  );
+};
 
 export default List;
