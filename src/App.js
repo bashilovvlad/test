@@ -1,10 +1,4 @@
-import React, {
-  Component,
-  Fragment,
-  useMemo,
-  useEffect,
-  useState
-} from "react";
+import React, { Fragment, useMemo, useEffect, useState } from "react";
 import GlobalStyle from "./globalStyle";
 import styled from "styled-components";
 

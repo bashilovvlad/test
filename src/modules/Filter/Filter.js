@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import styled from "styled-components";
 
 import Checkbox from "../../components/Checkbox";
@@ -11,6 +11,20 @@ const Container = styled.div`
 `;
 
 const Filter = ({ filters, onChange }) => {
+  const handleAllCheck = e => {
+    const keys = {};
+    Object.keys(filters).forEach(i => {
+      keys[i] = e.target.checked;
+    });
+    onChange({
+      ...keys
+    });
+  };
+
+  const allCheck = useMemo(() => {
+    return Object.keys(filters).every(i => filters[i]);
+  }, [filters]);
+
   const handleCheck = e => {
     onChange({
       ...filters,
@@ -20,6 +34,12 @@ const Filter = ({ filters, onChange }) => {
 
   return (
     <Container>
+      <Checkbox
+        label="Выбрыть все"
+        value={"all"}
+        checked={allCheck}
+        onChange={handleAllCheck}
+      />
       <Checkbox
         label="Без пересадок"
         value={0}
