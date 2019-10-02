@@ -61,18 +61,18 @@ const Checkmark = styled.div`
 
 const CheckBox = props => {
   return (
-    <Container >
+    <Container  >
       <label>
         <input
           key={props.id}
-          onChange={props.handleCheck}
+          onChange={props.onChange}
           type="checkbox"
-          checked={props.isChecked}
+          checked={props.checked}
           value={props.value}
         />
-        <Checkmark checked={props.isChecked}/>
-        <CustomBox checked={props.isChecked}/>
-        <Text>{props.value}</Text>
+        <Checkmark checked={props.checked}/>
+        <CustomBox checked={props.checked}/>
+        <Text>{props.label}</Text>
       </label>
     </Container>
   );

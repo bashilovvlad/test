@@ -1,14 +1,20 @@
-import React, { Component, Fragment } from 'react';
-import GlobalStyle from './globalStyle';
-import styled from 'styled-components';
+import React, {
+  Component,
+  Fragment,
+  useMemo,
+  useEffect,
+  useState
+} from "react";
+import GlobalStyle from "./globalStyle";
+import styled from "styled-components";
 
-import Logo from './components/Logo';
-import Loader from './components/Loader';
-import Message from './components/Message';
-import ScrollTo from './components/ScrollTo';
+import Logo from "./components/Logo";
+import Loader from "./components/Loader";
+import Message from "./components/Message";
+import ScrollTo from "./components/ScrollTo";
 
-import Filter from './modules/Filter';
-import List from './modules/List';
+import Filter from "./modules/Filter";
+import List from "./modules/List";
 
 const Layout = styled.div`
   display: flex;
@@ -38,144 +44,105 @@ const Main = styled.div`
   flex-direction: column;
 `;
 
-class App extends Component {
-  state = {
-    allChecked: true,
-    stops: [
-      { id: 0, value: 'Бeз пересадок', isChecked: true },
-      { id: 1, value: '1 пересадка', isChecked: true },
-      { id: 2, value: '2 пересадки', isChecked: true },
-      { id: 3, value: '3 пересадки', isChecked: true },
-    ],
-    tickets: [],
-    loading: false,
-    searchId: null,
-    error: null,
-    loaded: false,
-  };
+const useTickets = () => {
+  const [searchId, setSearchId] = useState(null);
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [loaded, setLoaded] = useState(false);
 
-  handleLoad = async () => {
-    if (!this.state.searchId) {
-      this.setState({
-        error: 'Need searchId',
-      });
-      return;
-    }
-
-    this.setState({
-      loading: true,
-    });
-
+  const load = React.useCallback(async () => {
+    setLoading(true);
     try {
       const r = await fetch(
-        `https://front-test.beta.aviasales.ru/tickets?searchId=${this.state.searchId}`
+        `https://front-test.beta.aviasales.ru/tickets?searchId=${searchId}`
       );
       const response = await r.json();
-      this.setState({
-        loading: false,
-        tickets: [...this.state.tickets, ...response.tickets],
-        loaded: response.stop,
-      });
+      setTickets(currentTickets => [...currentTickets, ...response.tickets]);
+      if (response.stop) {
+        setLoaded(true);
+      }
     } catch (error) {
-      this.setState({
-        loading: false,
-        error: 'Something went wrong',
-      });
+      setError("loading error");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [searchId]);
 
-  handleAllCheck = event => {
-    let stops = [...this.state.stops];
-    stops.forEach(stop => (stop.isChecked = event.target.checked));
-    this.setState({ stops, allChecked: event.target.checked });
-  };
+  useEffect(() => {
+    fetch("https://front-test.beta.aviasales.ru/search")
+      .then(r => r.json())
+      .then(({ searchId }) => {
+        setSearchId(searchId);
+      })
+      .catch(error => setError("searchId error"));
+  }, []);
 
-  handleCheck = event => {
-    let stops = [...this.state.stops];
-    stops.forEach(stop => {
-      if (stop.value === event.target.value)
-        stop.isChecked = event.target.checked;
+  useEffect(() => {
+    if (searchId) {
+      load();
+    }
+  }, [searchId, load]);
+
+  return {
+    tickets,
+    loading,
+    error,
+    load,
+    setError,
+    loaded
+  };
+};
+
+const App = () => {
+  const { tickets, error, loading, load, loaded, setError } = useTickets();
+
+  const [filters, setFilters] = useState({
+    0: true,
+    1: true,
+    2: true,
+    3: true
+  });
+
+  const filteredTickets = useMemo(() => {
+    return tickets.filter(i => {
+      const toStop = i.segments[0].stops.length;
+      const fromStop = i.segments[1].stops.length;
+
+      return filters[toStop] && filters[fromStop];
     });
-    this.setState(currentState => {
-      return {
-        stops: stops,
-        allChecked: currentState.stops.every(i => i.isChecked),
-      };
-    });
-  };
+  }, [filters, tickets]);
 
-  getFilteredTickets = () => {
-    return this.state.allChecked
-      ? this.state.tickets
-      : this.state.tickets.filter(i => {
-          const toStop = i.segments[0].stops.length;
-          const fromStop = i.segments[1].stops.length;
-
-          return (
-            this.state.stops.find(i => i.id === toStop).isChecked &&
-            this.state.stops.find(i => i.id === fromStop).isChecked
-          );
-        });
-  };
-
-  componentDidMount() {
-    if (!this.state.searchId) {
-      this.setState({ loading: true });
-      fetch('https://front-test.beta.aviasales.ru/search')
-        .then(res => res.json())
-        .then(res => this.setState({ searchId: res.searchId, loading: false }))
-        .catch(err => this.setState({ error: 'Something went wrong' }));
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.searchId !== prevState.searchId) {
-      this.handleLoad();
-    }
-  }
-
-  render() {
-    return (
-      <Fragment>
-        <GlobalStyle />
-        {this.state.loading ? <Loader /> : null}
-        <Layout>
-          <ButtonHolder>
-            {!this.state.loaded && (
-              <Logo
-                onClick={() => {
-                  this.handleLoad(this.state.searchId);
-                }}
-              ></Logo>
-            )}
-          </ButtonHolder>
-          <Container>
-            <Aside>
-              <Filter
-                allChecked={this.state.allChecked}
-                handleCheck={this.handleCheck}
-                handleAllCheck={this.handleAllCheck}
-                stops={this.state.stops}
-              />
-            </Aside>
-            <Main>
-              {this.state.tickets ? (
-                <List list={this.getFilteredTickets()}></List>
-              ) : null}
-              {this.state.error ? (
-                <Message
-                  error
-                  text={this.state.error}
-                  onClose={() => this.setState({ error: '' })}
-                ></Message>
-              ) : null}
-            </Main>
-          </Container>
-        </Layout>
-        <ScrollTo />
-      </Fragment>
-    );
-  }
-}
+  return (
+    <Fragment>
+      <GlobalStyle />
+      {loading ? <Loader /> : null}
+      <Layout>
+        <ButtonHolder>{!loaded && <Logo onClick={load}></Logo>}</ButtonHolder>
+        <Container>
+          <Aside>
+            <Filter
+              filters={filters}
+              onChange={f => {
+                setFilters(f);
+              }}
+            />
+          </Aside>
+          <Main>
+            <List list={filteredTickets} />
+            {error ? (
+              <Message
+                error
+                text={error}
+                onClose={() => setError("")}
+              ></Message>
+            ) : null}
+          </Main>
+        </Container>
+      </Layout>
+      <ScrollTo />
+    </Fragment>
+  );
+};
 
 export default App;
