@@ -40,7 +40,7 @@ const List = ({ tickets }) => {
     <Container>
       <Sort
         price={isPriceSort}
-        onClick={type => handleChangeSortType(type)}
+        onChange={type => handleChangeSortType(type)}
       ></Sort>
       {sortedList.map((i, index) => (
         <ListItem ticket={i} key={index} />

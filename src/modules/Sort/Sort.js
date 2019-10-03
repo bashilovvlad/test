@@ -12,12 +12,12 @@ const Container = styled.div`
   display: flex;
 `;
 
-const Sort = ({ price, onClick }) => (
+const Sort = ({ price, onChange }) => (
   <Container>
-    <Button primary={price} left onClick={() => onClick('price')}>
+    <Button primary={price} left onClick={() => onChange('price')}>
       самый дешевый
     </Button>
-    <Button primary={!price} right onClick={() => onClick()}>
+    <Button primary={!price} right onClick={() => onChange()}>
       самый быстрый
     </Button>
   </Container>

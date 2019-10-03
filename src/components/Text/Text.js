@@ -8,11 +8,13 @@ const Container = styled.div`
   font-size: ${props => (props.black ? "14px" : "12px")};
   line-height: 18px;
   color: ${props => (props.black ? "#4A4A4A" : "#A0B0B9")};
-  text-transform: ${props => (props.uppercase ? "uppercase" : "none")};;
+  text-transform: ${props => (props.uppercase ? "uppercase" : "none")};
 `;
 
 const Text = ({ black, children, uppercase }) => (
-  <Container black={black} uppercase={uppercase}>{children}</Container>
+  <Container black={black} uppercase={uppercase}>
+    {children}
+  </Container>
 );
 
 export default Text;

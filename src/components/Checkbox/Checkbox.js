@@ -11,7 +11,7 @@ const Container = styled.div`
     display: flex;
     align-items: center;
     width: 100%;
-    cursor: pointer
+    cursor: pointer;
   }
 
   input {
@@ -19,7 +19,7 @@ const Container = styled.div`
   }
 
   &:hover {
-    background: #F1FCFF;
+    background: #f1fcff;
   }
 `;
 
@@ -46,22 +46,21 @@ const Checkmark = styled.div`
   display: ${props => (props.checked ? "block" : "none")};
   position: absolute;
   left: 17px;
-  
-  &:after{
-    content: '';
+
+  &:after {
+    content: "";
     display: block;
     width: 3px;
     height: 6px;
-    border: solid #2196F3;
+    border: solid #2196f3;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
   }
-}
-`
+`;
 
 const CheckBox = props => {
   return (
-    <Container  >
+    <Container>
       <label>
         <input
           key={props.id}
@@ -70,8 +69,8 @@ const CheckBox = props => {
           checked={props.checked}
           value={props.value}
         />
-        <Checkmark checked={props.checked}/>
-        <CustomBox checked={props.checked}/>
+        <Checkmark checked={props.checked} />
+        <CustomBox checked={props.checked} />
         <Text>{props.label}</Text>
       </label>
     </Container>
